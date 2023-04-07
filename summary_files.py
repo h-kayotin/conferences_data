@@ -6,6 +6,9 @@ Date： 2023/4/6
 """
 from pathlib import Path
 import openpyxl
+from openpyxl.workbook.workbook import Workbook
+from openpyxl.worksheet.worksheet import Worksheet
+from openpyxl.cell import Cell
 
 
 def sum_csv():
@@ -16,9 +19,24 @@ def sum_xls():
     pass
 
 
-def sum_xlsx(list):
-    for xlsx_file in list:
-        pass
+def sum_xlsx(x_list, x_s_num):
+    sum_wb = openpyxl.Workbook()  # type: Workbook
+    sum_sheet = sum_wb.worksheets[0]  # type: Worksheet
+    sum_col, sum_row = 1, 1
+
+    for xlsx_file in x_list:
+        wb = openpyxl.load_workbook(xlsx_file)  # type: Workbook
+        sheet = wb.worksheets[0]  # type: Worksheet
+        for row in range(x_s_num, sheet.max_row+1):
+            for col in range(1, sheet.max_column + 1):
+                cell = sheet.cell(row, col)  # type: Cell
+                sum_sheet.cell(sum_row, sum_col, cell.value)
+                sum_col += 1
+            sum_row += 1
+            sum_col = 1  # 读完一行，列重新从1开始
+
+    sum_wb.save("./output/summary_excel.xlsx")
+    print(f"合并完毕，共合并了{sum_row}行数据--->")
 
 
 def get_files_from_folder(input_path):
@@ -42,3 +60,8 @@ if __name__ == '__main__':
             break
         else:
             print("路径有误，请重新输入--->\n")
+    save_path = Path("./output")
+    if not save_path.exists():
+        Path.mkdir(save_path)
+    start_num = int(input("请输入数据开始的列："))
+    sum_xlsx(files_list, start_num)
