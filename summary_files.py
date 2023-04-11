@@ -14,19 +14,48 @@ from bs4 import BeautifulSoup
 import time
 
 
-def sum_csv(files):
-    pass
+def sum_csv(files, start_row):
+    sum_wb = openpyxl.Workbook()
+    sum_sheet = sum_wb.worksheets[0]
+    sum_col, sum_row = 1, 1
+
+    for csv_file in files:
+        row_num = 0
+        with open(csv_file, "r", encoding="utf-8") as file:
+            row = file.readline()
+            while row:
+                row_list = row.split(",")
+                if row_num > start_row:
+                    for col in range(len(row_list)):
+                        sum_sheet.cell(sum_row, sum_col, row_list[col])
+                        sum_col += 1
+                    sum_row += 1
+                sum_col = 1
+                row = file.readline()
+                row_num += 1
+
+    sum_wb.save("./output/summary_excel.xlsx")
+    print(f"合并完毕，共合并了{sum_row}行数据--->")
 
 
 def sum_xls(files_list, start_num):
-    sum_wb = openpyxl.Workbook()  # type: Workbook
-    sum_sheet = sum_wb.worksheets[0]  # type: Worksheet
+    sum_wb = openpyxl.Workbook()
+    sum_sheet = sum_wb.worksheets[0]
     sum_col, sum_row = 1, 1
 
     for xls_file in files_list:
         wb = xlrd.open_workbook(xls_file)
         sheet = wb.sheet_by_index(0)
-        print(sheet.nrows, sheet.ncols)
+        for row in range(start_num, sheet.nrows):
+            for col in range(sheet.ncols):
+                cell_value = sheet.cell_value(row, col)
+                sum_sheet.cell(sum_row, sum_col, cell_value)
+                sum_col += 1
+            sum_row += 1
+            sum_col = 1  # 读完一行，列重新从1开始
+
+    sum_wb.save("./output/summary_excel.xlsx")
+    print(f"合并完毕，共合并了{sum_row}行数据--->")
 
 
 def sum_xlsx(x_list, x_s_num):
@@ -103,9 +132,8 @@ def main():
     if not save_path.exists():
         Path.mkdir(save_path)
     # start_num = int(input("请输入数据开始的列："))
-    sum_html(files_list)
+    sum_csv(files_list, 2)
 
 
 if __name__ == '__main__':
     main()
-
