@@ -9,7 +9,7 @@ from pathlib import Path
 import openpyxl
 from openpyxl.workbook.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
-from openpyxl.utils import get_column_letter, column_index_from_string
+from openpyxl.utils import get_column_letter, column_index_from_string as col_index
 import datetime
 from openpyxl.cell import Cell
 import xlrd
@@ -76,17 +76,17 @@ def read_xlsx(file_src, file_config, file_name):
     processed_data_list = []
     for rout_index in range(len(data_list)):
         for row in range(start_row, sheet.max_row + 1):
-            if sheet.cell(row, 1) == "合计":
+            if type(sheet.cell(row, 1).value) is str:
                 break
             # 如果销售额是0，跳过
-            if sheet.cell(row, column_index_from_string(data_list[rout_index]["start_row"])).value == 0:
+            if sheet.cell(row, col_index(data_list[rout_index]["start_row"])).value == 0:
                 continue
 
             processed_row = []
-            for col in range(column_index_from_string(static_start), column_index_from_string(static_end)):
+            for col in range(col_index(static_start), col_index(static_end) + 1):
                 processed_row.append(sheet.cell(row, col).value)
-            processed_row.append(sheet.cell(row, column_index_from_string(data_list[rout_index]["start_row"])).value)
-            processed_row.append(sheet.cell(row, column_index_from_string(data_list[rout_index]["end_row"])).value)
+            processed_row.append(sheet.cell(row, col_index(data_list[rout_index]["start_row"])).value)
+            processed_row.append(sheet.cell(row, col_index(data_list[rout_index]["end_row"])).value)
             processed_row.append(data_list[rout_index]["router"])
             processed_row.append(datetime.datetime.today().strftime("%Y年%m月%d日"))
             processed_row.append(file_name)
@@ -98,7 +98,62 @@ def read_xlsx(file_src, file_config, file_name):
 
 
 def read_xls(file_src, file_config, file_name):
-    pass
+    wb = xlrd.open_workbook(file_src)
+    sheet = wb.sheet_by_name(file_config["sheet_name"])
+
+    # xlrd的读取，是从0开始，所以都要减去1做下处理
+    start_row = int(file_config["data_start_row"]) - 1
+    static_start = col_index(file_config["static_start"]) - 1
+    static_end = col_index(file_config["static_end"])
+    data_list = file_config["data_list"]
+
+    processed_data_list = []
+    for rout_index in range(len(data_list)):
+        for row in range(start_row, sheet.nrows):
+            # print(type(sheet.cell(row, 0).value))
+            if type(sheet.cell(row, 1).value) is str:
+                break
+            if sheet.cell(row, col_index(data_list[rout_index]["start_row"]) - 1).value == 0:
+                continue
+
+            processed_row = []
+            for col in range(static_start, static_end):
+                processed_row.append(sheet.cell(row, col).value)
+            processed_row.append(sheet.cell(row, col_index(data_list[rout_index]["start_row"]) - 1).value)
+            processed_row.append(sheet.cell(row, col_index(data_list[rout_index]["end_row"]) - 1).value)
+            processed_row.append(data_list[rout_index]["router"])
+            processed_row.append(datetime.datetime.today().strftime("%Y年%m月%d日"))
+            processed_row.append(file_name)
+            processed_row.append("一般贸易")
+            processed_row.append("ST(销)")
+            processed_data_list.append(processed_row)
+
+    return processed_data_list
+
+
+def write_sum(data_list, file_name):
+    save_path = Path("./output/一般业务ST销售汇总.xlsx")
+    if save_path.exists():
+        sum_wb = openpyxl.load_workbook("./output/一般业务ST销售汇总.xlsx")
+    else:
+        sum_wb = openpyxl.Workbook()  # type: Workbook
+    sum_sheet = sum_wb.worksheets[0]  # type: Worksheet
+
+    sum_col = 1
+    sum_row = sum_sheet.max_row + 1
+    print(f"正在导入【{file_name}】的数据--->\n")
+
+    for row in range(1, len(data_list) + 1):
+        for col in range(1, len(data_list[row-1]) + 1):
+            data_row = data_list[row - 1]
+            sum_sheet.cell(sum_row, sum_col, data_row[col - 1])
+            sum_col += 1
+        sum_row += 1
+        sum_col = 1
+
+        if sum_row % 1000 == 0:
+            print(f"已写入{sum_row}行数据--->\n")
+    sum_wb.save("./output/一般业务ST销售汇总.xlsx")
 
 
 def main():
@@ -106,7 +161,7 @@ def main():
 
     while True:
         source_src = Path(input("请输入文件夹路径："))
-        #  C:\Users\JiangHai江海\Desktop\工作\04.数据导出\BI\source_BI
+        #  C:\Users\JiangHai江海\Desktop\工作\04.数据导出、合并\BI\source_BI
         files_list = get_files_from_folder(source_src)
         if source_src.exists():
             break
@@ -117,15 +172,13 @@ def main():
         file_name = Path(file).stem
         file_type = str(file).split(".")[-1]
         if file_type == "xlsx":
-            read_xlsx(file, config_file[file_name], file_name)
+            sum_list = read_xlsx(file, config_file[file_name], file_name)
         else:
-            read_xls(file, config_file[file_name], file_name)
+            sum_list = read_xls(file, config_file[file_name], file_name)
+        write_sum(sum_list, file_name)
 
 
 if __name__ == '__main__':
-    config_file = read_config()
-    res_list = read_xlsx("sources/上海路捷.xlsx", config_file["上海路捷"], "上海路捷")
-    print(len(res_list))
-    print(res_list[0])
+    main()
 
 
