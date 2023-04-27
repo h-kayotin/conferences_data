@@ -11,10 +11,7 @@ from openpyxl.workbook.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 from openpyxl.utils import get_column_letter, column_index_from_string as col_index
 import datetime
-from openpyxl.cell import Cell
 import xlrd
-from bs4 import BeautifulSoup
-import time
 
 
 def get_files_from_folder(input_path):
@@ -151,8 +148,7 @@ def write_sum(data_list, file_name):
         sum_row += 1
         sum_col = 1
 
-        if sum_row % 1000 == 0:
-            print(f"已写入{sum_row}行数据--->\n")
+    print(f"共写入{len(data_list) }行数据--->\n")
     sum_wb.save("./output/一般业务ST销售汇总.xlsx")
 
 
@@ -180,5 +176,7 @@ def main():
 
 if __name__ == '__main__':
     main()
+    print("结果已保存到/output/一般业务ST销售汇总.xlsx\n")
+    input("请按Enter键退出，或直接关闭程序")
 
 
