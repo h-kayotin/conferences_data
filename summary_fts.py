@@ -190,7 +190,7 @@ def main():
 
 if __name__ == '__main__':
     main()
-    print("结果已保存到/output/一般业务ST销售汇总.xlsx\n")
+    print("合并完毕，结果已保存到/output/一般业务ST销售汇总.xlsx\n")
     input("请按Enter键退出，或直接关闭程序")
 
 
