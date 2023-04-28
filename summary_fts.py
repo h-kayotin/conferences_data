@@ -119,6 +119,8 @@ def read_xls(file_src, file_config, file_name):
             # print(type(sheet.cell(row, 0).value))
             if type(sheet.cell(row, 1).value) is str:
                 break
+            if sheet.cell(row, 1).value is None:
+                break
             if sheet.cell(row, col_index(data_list[rout_index]["start_row"]) - 1).value == 0:
                 continue
 
