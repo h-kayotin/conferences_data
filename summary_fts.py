@@ -165,7 +165,8 @@ def write_sum(data_list, file_name, title_row):
 
     print(f"共写入{len(data_list)}行数据--->\n")
     sum_wb.save("./output/一般业务ST销售汇总.xlsx")
-    return sum_row
+    total_row = sum_sheet.max_row
+    return total_row
 
 
 def main():
@@ -186,7 +187,7 @@ def main():
             sum_list = read_xlsx(file, config_file[file_name], file_name)
         else:
             sum_list = read_xls(file, config_file[file_name], file_name)
-        len_total += write_sum(sum_list, file_name, title_row)
+        len_total = write_sum(sum_list, file_name, title_row)
         len_this += len(sum_list)
     return len_this, len_total
 
