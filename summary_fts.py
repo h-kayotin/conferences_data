@@ -39,6 +39,8 @@ def read_config():
 
     config_dic = {}
     con_wb = openpyxl.load_workbook("sources/config.xlsx")  # type: Workbook
+
+    # 读取各代理商表格参数
     con_sheet = con_wb.worksheets[0]  # type: Worksheet
     for row in range(2, con_sheet.max_row + 1):
         config_dic[con_sheet.cell(row, 1).value] = {
@@ -58,7 +60,14 @@ def read_config():
                 "end_row": cell_values[2]
             }
             config_dic[con_sheet.cell(row, 1).value]["data_list"].append(data)
-    return config_dic
+
+    # 读取表头
+    title_sheet = con_wb.worksheets[1]  # type: Worksheet
+    title_list = []
+    for i in range(1, title_sheet.max_column + 1):
+        title_list.append(title_sheet.cell(1, i).value)
+
+    return config_dic, title_list
 
 
 def read_xlsx(file_src, file_config, file_name):
@@ -128,7 +137,7 @@ def read_xls(file_src, file_config, file_name):
     return processed_data_list
 
 
-def write_sum(data_list, file_name):
+def write_sum(data_list, file_name, title_row):
     save_path = Path("./output/一般业务ST销售汇总.xlsx")
     if save_path.exists():
         sum_wb = openpyxl.load_workbook("./output/一般业务ST销售汇总.xlsx")
@@ -140,10 +149,16 @@ def write_sum(data_list, file_name):
     sum_row = sum_sheet.max_row + 1
     print(f"正在导入【{file_name}】的数据--->\n")
 
+    if sum_row > 2:
+        pass
+    else:
+        for i in range(1, len(title_row)+1):
+            sum_sheet.cell(1, i, title_row[i-1])
+
     for row in range(1, len(data_list) + 1):
         for col in range(1, len(data_list[row-1]) + 1):
             data_row = data_list[row - 1]
-            sum_sheet.cell(sum_row, sum_col, data_row[col - 1])
+            sum_sheet.cell(sum_row, sum_col, data_row[col-1])
             sum_col += 1
         sum_row += 1
         sum_col = 1
@@ -153,8 +168,7 @@ def write_sum(data_list, file_name):
 
 
 def main():
-    config_file = read_config()  # 读取配置文件
-
+    config_file, title_row = read_config()  # 读取配置文件
     while True:
         source_src = Path(input("请输入文件夹路径："))
         #  C:\Users\JiangHai江海\Desktop\工作\04.数据导出、合并\BI\source_BI
@@ -171,7 +185,7 @@ def main():
             sum_list = read_xlsx(file, config_file[file_name], file_name)
         else:
             sum_list = read_xls(file, config_file[file_name], file_name)
-        write_sum(sum_list, file_name)
+        write_sum(sum_list, file_name, title_row)
 
 
 if __name__ == '__main__':
