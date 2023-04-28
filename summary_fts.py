@@ -147,7 +147,7 @@ def write_sum(data_list, file_name, title_row):
 
     sum_col = 1
     sum_row = sum_sheet.max_row + 1
-    print(f"正在导入【{file_name}】的数据--->\n")
+    print(f"正在导入【{file_name}】的数据--->")
 
     if sum_row > 2:
         pass
@@ -163,8 +163,9 @@ def write_sum(data_list, file_name, title_row):
         sum_row += 1
         sum_col = 1
 
-    print(f"共写入{len(data_list) }行数据--->\n")
+    print(f"共写入{len(data_list)}行数据--->\n")
     sum_wb.save("./output/一般业务ST销售汇总.xlsx")
+    return sum_row
 
 
 def main():
@@ -177,7 +178,7 @@ def main():
             break
         else:
             print("路径有误，请重新输入--->\n")
-
+    len_this, len_total = 0, 0
     for file in files_list:
         file_name = Path(file).stem
         file_type = str(file).split(".")[-1]
@@ -185,12 +186,15 @@ def main():
             sum_list = read_xlsx(file, config_file[file_name], file_name)
         else:
             sum_list = read_xls(file, config_file[file_name], file_name)
-        write_sum(sum_list, file_name, title_row)
+        len_total += write_sum(sum_list, file_name, title_row)
+        len_this += len(sum_list)
+    return len_this, len_total
 
 
 if __name__ == '__main__':
-    main()
-    print("合并完毕，结果已保存到/output/一般业务ST销售汇总.xlsx\n")
+    len_t, len_sum = main()
+    print(f"合并完毕，本次共合并{len_t}条数据，\n结果已保存到/output/一般业务ST销售汇总.xlsx")
+    print(f"目前共有{len_sum}条数据------->\n")
     input("请按Enter键退出，或直接关闭程序")
 
 
