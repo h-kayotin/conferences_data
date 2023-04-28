@@ -183,10 +183,10 @@ def main():
     for file in files_list:
         file_name = Path(file).stem
         file_type = str(file).split(".")[-1]
-        if file_type == "xlsx":
-            sum_list = read_xlsx(file, config_file[file_name], file_name)
-        else:
+        if file_type == "xls":
             sum_list = read_xls(file, config_file[file_name], file_name)
+        else:
+            sum_list = read_xlsx(file, config_file[file_name], file_name)
         len_total = write_sum(sum_list, file_name, title_row)
         len_this += len(sum_list)
     return len_this, len_total
@@ -197,5 +197,3 @@ if __name__ == '__main__':
     print(f"合并完毕，本次共合并{len_t}条数据，\n结果已保存到/output/一般业务ST销售汇总.xlsx")
     print(f"目前共有{len_sum}条数据------->\n")
     input("请按Enter键退出，或直接关闭程序")
-
-
