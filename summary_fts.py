@@ -84,8 +84,12 @@ def read_xlsx(file_src, file_config, file_name):
         for row in range(start_row, sheet.max_row + 1):
             if type(sheet.cell(row, 1).value) is str:
                 break
+            if sheet.cell(row, 2).value is None:
+                break
             # 如果销售额是0，跳过
             if sheet.cell(row, col_index(data_list[rout_index]["start_row"])).value == 0:
+                continue
+            if sheet.cell(row, col_index(data_list[rout_index]["start_row"])).value is None:
                 continue
 
             processed_row = []
