@@ -81,16 +81,34 @@ def read_xlsx(file_src, file_config, file_name):
 
     processed_data_list = []
     for rout_index in range(len(data_list)):
+        col_total = 0
         for row in range(start_row, sheet.max_row + 1):
-            if type(sheet.cell(row, 1).value) is str:
-                break
-            if sheet.cell(row, 2).value is None:
-                break
-            # 如果销售额是0，跳过
+            # if type(sheet.cell(row, 1).value) is str:  # 最后一行是合计的情况
+            #     break
+            # # 中间有空行的情况
+            # if sheet.cell(row, 2).value is None and sheet.cell(row, 1).value is None:
+            #     break
+            # if sheet.cell(row, 2).value == 0 and sheet.cell(row, 1).value == 0:
+            #     break
+            # 如果销售额是0，跳过该行继续进行下一行
+
+            # 跳过销售额为0的行
             if sheet.cell(row, col_index(data_list[rout_index]["start_row"])).value == 0:
                 continue
+            # 跳过数据为null的行
             if sheet.cell(row, col_index(data_list[rout_index]["start_row"])).value is None:
                 continue
+            # 如果数字等于合计，说明是合计的那行，结束遍历
+            if col_total == sheet.cell(row, col_index(data_list[rout_index]["start_row"])).value:
+                #  如果两行的销量一样，也满足条件，所以加了以下判断
+                if sheet.cell(row, 2).value == 0 and sheet.cell(row, 1).value == 0:
+                    break
+                elif sheet.cell(row, 2).value is None and sheet.cell(row, 3).value is None:
+                    break
+                elif type(sheet.cell(row, 1).value) is str:
+                    break
+            # 累加来计算这一列的合计值
+            col_total += sheet.cell(row, col_index(data_list[rout_index]["start_row"])).value
 
             processed_row = []
             for col in range(col_index(static_start), col_index(static_end) + 1):
