@@ -1,5 +1,5 @@
 """
-summary_files - 汇总数据到一张表里
+summary_files - 汇总数据到一张表里，支持xls，xlsx，csv，html
 
 Author: JiangHai江海
 Date： 2023/4/6
