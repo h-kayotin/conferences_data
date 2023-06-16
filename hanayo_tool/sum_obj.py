@@ -17,7 +17,7 @@ class SumTool(object):
         self.row_num = 1
         self.col_num = 1
         self.path = Path(input("请输入源数据文件夹路径："))
-        self.files_list = list(self.path.glob("*"))
+        self.files_list = list(self.path.glob("*.xls"))
         self.data_list = list()
 
     def sum_html(self, file):
@@ -46,7 +46,7 @@ class SumTool(object):
         worksheet = workbook.worksheets[0]  # type:Worksheet
         for row in self.data_list:
             worksheet.append(row)
-        workbook.save("./output/summary_excel.xlsx")
+        workbook.save(f"{self.path}/summary_excel.xlsx")
         end = time.time()
         print(f"共耗时：{end - start:.2f}秒，合并了{len(self.data_list)}条数据。")
 

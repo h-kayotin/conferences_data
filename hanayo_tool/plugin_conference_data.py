@@ -1,6 +1,28 @@
 """
-conference_263 - 读取263的账单，写入到汇总表中
+conference_263 - 读取各个会议平台的账单，写入到汇总表中
+在之前公司使用的一个工具，现在估计没啥用了。放着参考吧、
+这个只针对前公司的每个月合并几个数据表格文件
+1. 账单和汇总表请放在同文件夹下的bills文件夹下面
+2. 文件名请一定要和保持如下格式：
 
+    263-2023-01.xlsx
+
+    证通-2023-01.xlsx
+
+    全时-2023-01.html
+
+    loopup-2023-01.csv
+
+    注意：以上名称请根据月份修改对应月份，比如2月是 263-2023-02.xlsx
+
+    汇总表名称请保持不要修改：账单汇总
+
+3. 使用方式
+
+    运行plugin_conference_data.py程序即可
+
+    然后按照提示输入文件名，注意此处只输入文件名，不要输入后缀
+    比如导入证通的数据，请输入证通-2023-01
 Author: ahjiang
 Date 2023/3/20
 """
@@ -104,7 +126,7 @@ def read_and_copy(wb, company, month, source_sheet, target_sheet_name, start_row
     values_source = read_cells_value(start_row, sheet_source, user_col, money_col)
     print(f"成功读取{company}会议{len(values_source)}条数据--->\n")
     # 读取汇总表格
-    wb_target = openpyxl.load_workbook("bills/账单汇总.xlsx")  # type:Workbook
+    wb_target = openpyxl.load_workbook("../bills/账单汇总.xlsx")  # type:Workbook
     target_sheet = wb_target[target_sheet_name]  # type: Worksheet
 
     # 先清空旧数据
@@ -124,7 +146,7 @@ def read_and_copy(wb, company, month, source_sheet, target_sheet_name, start_row
     month_format(sheet_target_sum, month)
 
     # 保存数据
-    wb_target.save("bills/账单汇总.xlsx")
+    wb_target.save("../bills/账单汇总.xlsx")
     print(f"成功写入{len(values_source)}条数据--->\n")
 
     return values_source
@@ -157,9 +179,9 @@ def bill_data_main():
         values_self = read_and_copy(wb, bill_company, bill_month, "账单金额-人工会", "263人工", 22, "B", "J")
         values_auto = read_and_copy(wb, bill_company, bill_month, "账单金额-自助会", "263自助", 22, "A", "I")
         # 将人工的数据也复制到自助里
-        copy_target = openpyxl.load_workbook("bills/账单汇总.xlsx")  # type:Workbook
+        copy_target = openpyxl.load_workbook("../bills/账单汇总.xlsx")  # type:Workbook
         write_to_sheet(copy_target["263自助"], values_self, len(values_auto) + 1)
-        copy_target.save("bills/账单汇总.xlsx")
+        copy_target.save("../bills/账单汇总.xlsx")
         print(f"成功将人工会议账单数据{len(values_self)}条写入自助sheet中--->\n")
 
     elif bill_company == "证通":
@@ -179,11 +201,11 @@ def bill_data_main():
                     total_loop += float(row[len(row) - 1])
         total_loop = int(total_loop * 100) / 100
         print(f"成功读取loopup{total_row}条数据，账单总额是{total_loop}美元，即将开始写入--->\n")
-        wb_target_loop = openpyxl.load_workbook("bills/账单汇总.xlsx")  # type:Workbook
+        wb_target_loop = openpyxl.load_workbook("../bills/账单汇总.xlsx")  # type:Workbook
         target_sheet_sum = wb_target_loop["费用总结"]  # type: Worksheet
         write_into_sum(bill_company, bill_month, "loopup", target_sheet_sum, total_loop)
         target_sheet_sum["B34"] = total_loop
-        wb_target_loop.save("bills/账单汇总.xlsx")
+        wb_target_loop.save("../bills/账单汇总.xlsx")
         print("写入成功--->")
 
     elif bill_company == "全时":
@@ -208,7 +230,7 @@ def bill_data_main():
                     values_quanshi.append(value)
             print(f"成功获取到{bill_company}的{len(values_quanshi)}条数据,开始准备写入--->\n")
             # 获取目标工作簿和sheet
-            workbook_target = openpyxl.load_workbook("bills/账单汇总.xlsx")  # type:Workbook
+            workbook_target = openpyxl.load_workbook("../bills/账单汇总.xlsx")  # type:Workbook
             target_quanshi = workbook_target["全时"]  # type: Worksheet
             # 清理目标sheet源数据
             clear_sheet_datas(target_quanshi)
@@ -217,7 +239,7 @@ def bill_data_main():
             # 写入到汇总中
             target_sheet_sum = workbook_target["费用总结"]  # type: Worksheet
             write_into_sum(bill_company, bill_month, "全时", target_sheet_sum, quanshi_sum)
-            workbook_target.save("bills/账单汇总.xlsx")
+            workbook_target.save("../bills/账单汇总.xlsx")
             print("写入成功--->\n")
 
 

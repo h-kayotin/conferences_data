@@ -1,6 +1,8 @@
 """
 summary_fts - 汇总代理商数据
 
+读取config文件，汇总销售数据
+
 Author: JiangHai江海
 Date： 2023/4/25
 """
